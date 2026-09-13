@@ -1,0 +1,52 @@
+@import 'tailwindcss';
+
+@theme {
+	--font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--font-mono: ui-monospace, 'SFMono-Regular', 'Cascadia Mono', 'Menlo', 'Consolas', monospace;
+	--color-ink: #0c0c0d;
+	--color-paper: #f3efe6;
+	--color-amber: #e8a317;
+}
+
+html {
+	background: var(--color-ink);
+	color: var(--color-paper);
+	-webkit-tap-highlight-color: transparent;
+}
+
+body {
+	min-height: 100dvh;
+	min-height: 100svh;
+	margin: 0;
+	padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+		env(safe-area-inset-left);
+	font-family: var(--font-sans);
+	background: radial-gradient(1200px 600px at 50% -10%, #1a1712 0%, var(--color-ink) 55%);
+	touch-action: manipulation;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+input[type='number'] {
+	-moz-appearance: textfield;
+	appearance: textfield;
+}
+
+@keyframes rep-pop {
+	from {
+		transform: scale(1.06);
+		opacity: 0.65;
+	}
+	to {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+.rep-pop {
+	animation: rep-pop 280ms ease-out;
+}
