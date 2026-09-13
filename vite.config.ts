@@ -3,6 +3,9 @@ import adapter from '@sveltejs/adapter-static';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
+const base = (process.argv.includes('dev') ? '' : (process.env.BASE_PATH ?? '')) as
+	'' | `/${string}`;
+
 export default defineConfig({
 	optimizeDeps: {
 		exclude: ['@electric-sql/pglite']
@@ -21,9 +24,9 @@ export default defineConfig({
 				runes: ({ filename }) =>
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
+			paths: { base },
 			adapter: adapter({
-				fallback: '200.html',
-				precompress: true
+				fallback: '404.html'
 			})
 		})
 	]

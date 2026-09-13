@@ -3,7 +3,7 @@
 /// <reference lib="esnext" />
 /// <reference lib="webworker" />
 
-import { build, files, prerendered, version } from '$service-worker';
+import { base, build, files, prerendered, version } from '$service-worker';
 
 const sw = self as unknown as ServiceWorkerGlobalScope;
 const CACHE = `twenty-minutes-${version}`;
@@ -56,7 +56,10 @@ async function respond(request: Request, url: URL): Promise<Response> {
 	} catch {
 		if (cached) return cached;
 		if (request.mode === 'navigate') {
-			const shell = await cache.match('/');
+			const shell =
+				(await cache.match(`${base}/`)) ??
+				(await cache.match(`${base}/404.html`)) ??
+				(await cache.match(base));
 			if (shell) return shell;
 		}
 		return Response.error();

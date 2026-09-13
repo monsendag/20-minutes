@@ -1,5 +1,6 @@
 <script lang="ts">
 	import './layout.css';
+	import { asset } from '$app/paths';
 	import favicon from '$lib/assets/favicon.svg';
 	import { getDb } from '$lib/db/client';
 	import { onMount } from 'svelte';
@@ -26,8 +27,8 @@
 		content="Plan your reps, run a 20-minute session, and log what you actually did."
 	/>
 	<link rel="icon" href={favicon} />
-	<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-	<link rel="manifest" href="/manifest.webmanifest" />
+	<link rel="apple-touch-icon" href={asset('/icons/apple-touch-icon.png')} />
+	<link rel="manifest" href={asset('/manifest.webmanifest')} />
 </svelte:head>
 
 {#if error}

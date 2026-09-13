@@ -31,6 +31,13 @@ npm run check     # svelte-check
 npm run lint
 ```
 
+## Deploy
+
+GitHub Pages is published from GitHub Actions on every push to `main`.
+
+The live site is [monsendag.github.io/20-minutes](https://monsendag.github.io/20-minutes/).
+CI sets `BASE_PATH=/20-minutes` so the app is served from that subpath.
+
 ## Architecture
 
 See [docs/architecture.md](docs/architecture.md) for the data model, timer

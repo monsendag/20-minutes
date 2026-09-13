@@ -40,14 +40,14 @@ installed PWA can resume. Completed sessions appear as a short history.
 
 ## Stack
 
-| Layer         | Choice                                              | Why                                                   |
-| ------------- | --------------------------------------------------- | ----------------------------------------------------- |
-| UI            | SvelteKit 2 + Svelte 5 runes, Tailwind 4            | Already the scaffold; static output                   |
-| Hosting shape | `@sveltejs/adapter-static` with `200.html` fallback | Installable PWA, no Node server                       |
-| Rendering     | `ssr = false`, `prerender = true` at the root       | PGlite is browser-only; `/` is an app shell           |
-| Database      | `@electric-sql/pglite` `idb://twenty-minutes`       | Real Postgres in WASM, durable via IndexedDB          |
-| Offline       | SvelteKit `src/service-worker.ts`                   | Precaches the shell, client bundle, and static assets |
-| Install       | `static/manifest.webmanifest` + PNG icons           | Standalone display, theme color, maskable icon        |
+| Layer         | Choice                                              | Why                                                     |
+| ------------- | --------------------------------------------------- | ------------------------------------------------------- |
+| UI            | SvelteKit 2 + Svelte 5 runes, Tailwind 4            | Already the scaffold; static output                     |
+| Hosting shape | `@sveltejs/adapter-static` with `404.html` fallback | GitHub Pages (Actions); installable PWA, no Node server |
+| Rendering     | `ssr = false`, `prerender = true` at the root       | PGlite is browser-only; `/` is an app shell             |
+| Database      | `@electric-sql/pglite` `idb://twenty-minutes`       | Real Postgres in WASM, durable via IndexedDB            |
+| Offline       | SvelteKit `src/service-worker.ts`                   | Precaches the shell, client bundle, and static assets   |
+| Install       | `static/manifest.webmanifest` + PNG icons           | Standalone display, theme color, maskable icon          |
 
 ## Runtime
 
@@ -78,11 +78,15 @@ prerendered shell does not try to boot Postgres.
 | --------------- | ----------------- | ----------------------------------------------------- |
 | `/`             | yes               | Planned-reps input, open sessions, recent history     |
 | `/session/[id]` | no (SPA fallback) | Session lifecycle for one row                         |
-| `200.html`      | adapter fallback  | Client-side navigation to unknown `/session/:id` URLs |
+| `404.html`      | adapter fallback  | Client-side navigation to unknown `/session/:id` URLs |
 
 `trailingSlash` is `never`. Dynamic session URLs are not prerendered; the
-static adapter emits `200.html` so a file server (and the service worker)
-can still load the client router.
+static adapter emits `404.html` so GitHub Pages (which serves that file for
+unknown paths) and the service worker can still load the client router.
+
+Production is hosted at `https://monsendag.github.io/20-minutes/`. The
+GitHub Actions workflow sets `BASE_PATH=/20-minutes` so SvelteKit prefixes
+assets and `resolve()` links. Local `vite dev` leaves the base empty.
 
 ## Data model
 
@@ -204,8 +208,10 @@ src/
     session/[id]/+page.ts          prerender=false
     session/[id]/+page.svelte      ready / running / log
 static/
+  .nojekyll                        keep _app/ out of Jekyll
   manifest.webmanifest
   icons/                           192, 512, maskable, apple-touch
+.github/workflows/deploy.yml       GitHub Pages (Actions)
 docs/architecture.md               this file
 ```
 
@@ -221,8 +227,8 @@ docs/architecture.md               this file
    duration (`20 minutes / planned reps`). Actual performance is logged
    afterwards, because it can be more or less than planned.
 4. **SPA fallback for `/session/:id`.** Static hosting cannot prerender
-   arbitrary UUIDs; `200.html` plus a client router is the adapter-static
-   pattern for that.
+   arbitrary UUIDs. GitHub Pages has no `200.html` rewrite, so the fallback
+   is `404.html`, which Pages already serves for unknown paths.
 5. **SvelteKit’s own service worker rather than `vite-plugin-pwa`.** The
    scaffold already uses the unified Vite SvelteKit config; the built-in SW
    module (`$service-worker`) is enough for a single-page offline app.
@@ -245,6 +251,15 @@ npm run preview
 
 Installability and the service worker should be checked against `preview`
 or a real static host — Vite dev does not exercise the production SW.
+
+A GitHub Pages production build (as CI does):
+
+```sh
+BASE_PATH=/20-minutes npm run build
+```
+
+Pushes to `main` run `.github/workflows/deploy.yml`, which builds with that
+base path and deploys the `build/` artifact via `actions/deploy-pages`.
 
 To jump a running session to the log screen without waiting 20 minutes,
 update `started_at` as shown under Persistence and reload `/session/:id`.
